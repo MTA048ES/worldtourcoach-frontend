@@ -2,7 +2,7 @@ import os
 import requests
 import datetime
 
-# --- DATOS DIRECTOS ---
+# --- DATOS CONFIRMADOS ---
 TELEGRAM_TOKEN = "8240108371:AAGkSgqM9ElmyLjRhSsIK01o-JlvgpvyQhM"
 CHAT_ID = "939585578"
 ID_ATLETA = "26693"
@@ -13,17 +13,18 @@ def enviar_telegram(mensaje):
     requests.post(url, json={"chat_id": CHAT_ID, "text": mensaje, "parse_mode": "Markdown"})
 
 def ejecutar():
-    hoy = datetime.date.today().isoformat()
-    # Pedimos los datos de bienestar (wellness) de hoy
-    url = f"https://intervals.icu/api/v1/athlete/{ID_ATLETA}/wellness/{hoy}"
+    # Pedimos los datos generales del atleta
+    url = f"https://intervals.icu/api/v1/athlete/{ID_ATLETA}"
     
+    # Intentamos conectar
     r = requests.get(url, auth=('athlete', API_KEY))
     
     if r.status_code == 200:
         data = r.json()
+        # Sacamos los datos de la parte de 'wellness' o directamente del perfil
         atl = data.get('atl', 0)
         ctl = data.get('ctl', 0)
-        tsb = data.get('tsb', 0)
+        tsb = data.get('ctl', 0) - data.get('atl', 0) # Calculamos la forma
         
         mensaje = f"--- 🦾 PARTE DE GUERRA ---\n\n"
         mensaje += f"🔥 *Fatiga (ATL):* {atl if atl else 0:.1f}\n"
@@ -32,7 +33,7 @@ def ejecutar():
         mensaje += "¡A tope hoy, Manu! 🚴‍♂️💨"
         enviar_telegram(mensaje)
     else:
-        enviar_telegram(f"❌ Error de conexión: Código {r.status_code}. Revisa tu API Key en Intervals.")
+        enviar_telegram(f"❌ Error {r.status_code}: La clave o el ID fallan. Entra en Intervals -> Settings -> API Key y dale a 'Reset' si hace falta.")
 
 if __name__ == "__main__":
     ejecutar()
