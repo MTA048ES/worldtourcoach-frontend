@@ -5,7 +5,7 @@ import datetime
 # --- CONFIGURACIÓN DESDE LA CAJA FUERTE ---
 TELEGRAM_TOKEN = os.getenv("TELEGRAM_TOKEN")
 CHAT_ID = os.getenv("CHAT_ID")
-INTERVALS_ID = "i26693"  
+INTERVALS_ID = "26693"  
 INTERVALS_API_KEY = os.getenv("INTERVALS_API_KEY")
 
 def enviar_telegram(mensaje):
