@@ -1,6 +1,6 @@
 import requests
 
-# DATOS DIRECTOS (Para probar si la puerta de Intervals está abierta)
+# DATOS DIRECTOS (Confirmados para ID 26693)
 TOKEN = "8240108371:AAGkSgqM9ElmyLjRhSsIK01o-JlvgpvyQhM"
 CHAT_ID = "939585578"
 API_KEY = "th7jrwg8e3ak9mjbe6naipue"
@@ -15,7 +15,7 @@ def enviar(texto):
         print(f"Error enviando a Telegram: {e}")
 
 def ejecutar():
-    # Intentamos entrar a Intervals
+    # Endpoint de wellness para sacar los vatios y fatiga
     url = f"https://intervals.icu/api/v1/athlete/{ID_ATLETA}/wellness"
     print(f"Conectando a Intervals con ID: {ID_ATLETA}...")
     
@@ -25,6 +25,7 @@ def ejecutar():
         
         if r.status_code == 200:
             datos = r.json()
+            # Cogemos el último día de la lista (el más reciente)
             u = datos[-1] if isinstance(datos, list) else datos
             
             res = "🦾 *PARTE DE GUERRA (Bermeo)*\n\n"
@@ -34,9 +35,9 @@ def ejecutar():
             res += "¡A tope hoy, Manu! 🚴‍♂️💨"
             enviar(res)
         elif r.status_code == 403:
-            enviar(f"❌ Error 403: Intervals sigue en 'Privado'. Cambia la visibilidad a 'Público' en Ajustes.")
+            enviar("❌ Error 403: Intervals sigue en 'Privado'. Cambia la visibilidad a 'Público' en Ajustes.")
         elif r.status_code == 401:
-            enviar(f"❌ Error 401: La API KEY no es correcta o el email no está confirmado.")
+            enviar("❌ Error 401: La API KEY no es correcta.")
         else:
             enviar(f"❌ Error {r.status_code}: Algo ha fallado en la conexión.")
             
