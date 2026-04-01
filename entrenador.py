@@ -6,7 +6,7 @@ import datetime
 TELEGRAM_TOKEN = "8240108371:AAGkSgqM9ElmyLjRhSsIK01o-JlvgpvyQhM"
 CHAT_ID = "939585578"
 ID_ATLETA = "26693"
-API_KEY = "4xczbq7hl20qsve9d7cz96mr1"
+API_KEY = "6wvb9yo79hz2ldumgdmhn1j60"
 
 def enviar_telegram(mensaje):
     url = f"https://api.telegram.org/bot{TELEGRAM_TOKEN}/sendMessage"
