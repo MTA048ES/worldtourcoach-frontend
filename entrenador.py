@@ -1,6 +1,6 @@
 import requests
 
-# DATOS (Verificados)
+# DATOS DIRECTOS (Para probar si la puerta de Intervals está abierta)
 TOKEN = "8240108371:AAGkSgqM9ElmyLjRhSsIK01o-JlvgpvyQhM"
 CHAT_ID = "939585578"
 API_KEY = "th7jrwg8e3ak9mjbe6naipue"
@@ -8,45 +8,40 @@ ID_ATLETA = "26693"
 
 def enviar(texto):
     url = f"https://api.telegram.org/bot{TOKEN}/sendMessage"
-    payload = {"chat_id": CHAT_ID, "text": texto, "parse_mode": "Markdown"}
-    requests.post(url, json=payload)
+    try:
+        r = requests.post(url, json={"chat_id": CHAT_ID, "text": texto, "parse_mode": "Markdown"})
+        print(f"Respuesta Telegram: {r.status_code}")
+    except Exception as e:
+        print(f"Error enviando a Telegram: {e}")
 
 def ejecutar():
-    # Probamos con la ruta de Wellness, que es la que tiene tus números
+    # Intentamos entrar a Intervals
     url = f"https://intervals.icu/api/v1/athlete/{ID_ATLETA}/wellness"
-    
-    # Nuevo método de cabecera (más seguro)
-    headers = {
-        "Authorization": f"Bearer {API_KEY}"
-    }
+    print(f"Conectando a Intervals con ID: {ID_ATLETA}...")
     
     try:
-        # Intentamos entrar con la API Key como 'Bearer'
         r = requests.get(url, auth=('athlete', API_KEY))
+        print(f"Respuesta Intervals: {r.status_code}")
         
-        # Si falla el anterior, probamos el plan B en el mismo momento
-        if r.status_code != 200:
-            r = requests.get(url, headers=headers)
-
         if r.status_code == 200:
             datos = r.json()
-            # Cogemos el último dato de la lista (el más reciente)
             u = datos[-1] if isinstance(datos, list) else datos
             
-            atl = u.get('atl', 0)
-            ctl = u.get('ctl', 0)
-            tsb = u.get('tsb', 0)
-            
             res = "🦾 *PARTE DE GUERRA (Bermeo)*\n\n"
-            res += f"🔥 *Fatiga (ATL):* {atl:.1f}\n"
-            res += f"💪 *Fitness (CTL):* {ctl:.1f}\n"
-            res += f"⚖️ *Estado (Forma):* {tsb:.1f}\n\n"
+            res += f"🔥 *Fatiga:* {u.get('atl', 0):.1f}\n"
+            res += f"💪 *Fitness:* {u.get('ctl', 0):.1f}\n"
+            res += f"⚖️ *Estado:* {u.get('tsb', 0):.1f}\n\n"
             res += "¡A tope hoy, Manu! 🚴‍♂️💨"
             enviar(res)
+        elif r.status_code == 403:
+            enviar(f"❌ Error 403: Intervals sigue en 'Privado'. Cambia la visibilidad a 'Público' en Ajustes.")
+        elif r.status_code == 401:
+            enviar(f"❌ Error 401: La API KEY no es correcta o el email no está confirmado.")
         else:
-            enviar(f"❌ Error {r.status_code}. Manu, entra en Intervals y comprueba que la API KEY sea exactamente: th7jrwg8e3ak9mjbe6naipue")
+            enviar(f"❌ Error {r.status_code}: Algo ha fallado en la conexión.")
             
     except Exception as e:
+        print(f"Error técnico: {e}")
         enviar(f"⚠️ Error técnico: {str(e)}")
 
 if __name__ == "__main__":
