@@ -1,11 +1,9 @@
-import os
 import requests
 import datetime
 
 # --- DATOS CONFIRMADOS ---
 TELEGRAM_TOKEN = "8240108371:AAGkSgqM9ElmyLjRhSsIK01o-JlvgpvyQhM"
 CHAT_ID = "939585578"
-ID_ATLETA = "26693"
 API_KEY = "6wvb9yo79hz2ldumgdmhn1j60"
 
 def enviar_telegram(mensaje):
@@ -13,27 +11,36 @@ def enviar_telegram(mensaje):
     requests.post(url, json={"chat_id": CHAT_ID, "text": mensaje, "parse_mode": "Markdown"})
 
 def ejecutar():
-    # Pedimos los datos generales del atleta
-    url = f"https://intervals.icu/api/v1/athlete/{ID_ATLETA}"
+    # PASO 1: Preguntar a Intervals quién soy yo con esta clave
+    url_me = "https://intervals.icu/api/v1/me"
+    r_me = requests.get(url_me, auth=('athlete', API_KEY))
     
-    # Intentamos conectar
-    r = requests.get(url, auth=('athlete', API_KEY))
-    
-    if r.status_code == 200:
-        data = r.json()
-        # Sacamos los datos de la parte de 'wellness' o directamente del perfil
-        atl = data.get('atl', 0)
-        ctl = data.get('ctl', 0)
-        tsb = data.get('ctl', 0) - data.get('atl', 0) # Calculamos la forma
+    if r_me.status_code == 200:
+        atleta = r_me.json()
+        id_real = atleta.get('id')
+        nombre = atleta.get('name', 'Manu')
         
-        mensaje = f"--- 🦾 PARTE DE GUERRA ---\n\n"
-        mensaje += f"🔥 *Fatiga (ATL):* {atl if atl else 0:.1f}\n"
-        mensaje += f"💪 *Fitness (CTL):* {ctl if ctl else 0:.1f}\n"
-        mensaje += f"⚖️ *Estado (Forma):* {tsb if tsb else 0:.1f}\n\n"
-        mensaje += "¡A tope hoy, Manu! 🚴‍♂️💨"
-        enviar_telegram(mensaje)
+        # PASO 2: Con el ID real, pedir los datos de entrenamiento
+        url_datos = f"https://intervals.icu/api/v1/athlete/{id_real}/wellness"
+        r_datos = requests.get(url_datos, auth=('athlete', API_KEY))
+        
+        if r_datos.status_code == 200:
+            datos = r_datos.json()
+            ultimo = datos[-1] if isinstance(datos, list) else datos
+            atl = ultimo.get('atl', 0)
+            ctl = ultimo.get('ctl', 0)
+            tsb = ultimo.get('tsb', 0)
+            
+            mensaje = f"--- 🦾 PARTE DE GUERRA ({nombre}) ---\n\n"
+            mensaje += f"🔥 *Fatiga (ATL):* {atl:.1f}\n"
+            mensaje += f"💪 *Fitness (CTL):* {ctl:.1f}\n"
+            mensaje += f"⚖️ *Estado (Forma):* {tsb:.1f}\n\n"
+            mensaje += "¡A tope hoy! 🚴‍♂️💨"
+            enviar_telegram(mensaje)
+        else:
+            enviar_telegram(f"❌ Error datos: {r_datos.status_code}. El ID {id_real} no responde.")
     else:
-        enviar_telegram(f"❌ Error {r.status_code}: La clave o el ID fallan. Entra en Intervals -> Settings -> API Key y dale a 'Reset' si hace falta.")
+        enviar_telegram(f"❌ Error clave: {r_me.status_code}. La clave nueva tampoco abre la puerta.")
 
 if __name__ == "__main__":
     ejecutar()
