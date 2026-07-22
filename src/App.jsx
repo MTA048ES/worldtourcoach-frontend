@@ -1,30 +1,20 @@
 import { useState, useEffect, useMemo } from 'react';
 import {
   LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip,
-  ResponsiveContainer, AreaChart, Area, ComposedChart, Bar,
-  Legend
+  ResponsiveContainer, ComposedChart, Area, Legend
 } from 'recharts';
 import {
   Bike, Activity, Calendar, TrendingUp, TrendingDown,
-  Battery, Zap, Flame, Droplet, Wind, Cloud, Thermometer,
-  Heart, Award, Clock, BarChart2, PieChart, Settings,
-  ChevronRight, ChevronDown, ExternalLink, RefreshCw,
-  Loader2, AlertTriangle, CheckCircle, XCircle,
-  MapPin, Navigation, Maximize2, Minimize2, Menu, X,
-  Home, List, LineChart as LineChartIcon, Target
+  Battery, Flame, Droplet, Wind, Cloud, Heart,
+  Settings, ChevronRight, RefreshCw, Loader2,
+  AlertTriangle, XCircle, Menu, X, Home, List,
+  LineChart as LineChartIcon, Target, Award, Zap
 } from 'lucide-react';
 import './index.css';
 
-// ============================================================
-// CONFIGURACIÓN
-// ============================================================
-
 const API_URL = 'https://worldtourcoach-backend-production-c14a.up.railway.app';
 
-// ============================================================
-// HOOKS PERSONALIZADOS
-// ============================================================
-
+// ─── HOOK PERSONALIZADO ───
 const useAthleteState = () => {
   const [data, setData] = useState(null);
   const [loading, setLoading] = useState(true);
@@ -52,13 +42,10 @@ const useAthleteState = () => {
   return { data, loading, error, refetch: fetchData };
 };
 
-// ============================================================
-// COMPONENTES DE CARGA Y ERROR
-// ============================================================
-
+// ─── PANTALLA DE CARGA ───
 const LoadingScreen = () => (
   <div className="min-h-screen bg-[#0a0e17] flex items-center justify-center">
-    <div className="text-center">
+    <div className="text-center animate-fade-in-up">
       <div className="relative w-16 h-16 mx-auto">
         <div className="absolute inset-0 border-4 border-[#1a2233] rounded-full"></div>
         <div className="absolute inset-0 border-4 border-t-[#60a5fa] rounded-full animate-spin"></div>
@@ -72,20 +59,19 @@ const LoadingScreen = () => (
   </div>
 );
 
+// ─── PANTALLA DE ERROR ───
 const ErrorScreen = ({ error, onRetry }) => (
   <div className="min-h-screen bg-[#0a0e17] flex items-center justify-center p-4">
-    <div className="bg-[#111827] border border-[#1f2937] rounded-2xl p-8 max-w-md w-full">
-      <div className="flex items-center gap-3 mb-4">
-        <XCircle className="w-8 h-8 text-[#ef4444]" />
-        <h2 className="text-xl font-bold text-white">Error de conexión</h2>
-      </div>
-      <p className="text-[#9ca3af] text-sm mb-4">No se pudo conectar con el backend.</p>
+    <div className="bg-[#111827] border border-[#1f2937] rounded-2xl p-8 max-w-md w-full shadow-2xl shadow-[#0a0e17]">
+      <XCircle className="w-12 h-12 text-[#ef4444] mx-auto mb-4" />
+      <h2 className="text-xl font-bold text-white text-center mb-2">Error de conexión</h2>
+      <p className="text-[#9ca3af] text-sm text-center mb-4">No se pudo conectar con el backend.</p>
       <div className="bg-[#0a0e17] rounded-lg p-3 mb-4">
         <p className="text-[#6b7a9f] text-xs font-mono break-all">{error}</p>
       </div>
       <button
         onClick={onRetry}
-        className="w-full bg-[#3b82f6] hover:bg-[#2563eb] text-white font-medium py-2.5 px-4 rounded-xl transition flex items-center justify-center gap-2"
+        className="w-full bg-gradient-to-r from-[#3b82f6] to-[#2563eb] hover:from-[#2563eb] hover:to-[#1d4ed8] text-white font-medium py-3 px-4 rounded-xl transition-all duration-300 flex items-center justify-center gap-2 shadow-lg shadow-[#3b82f6]/20 hover:shadow-[#3b82f6]/40"
       >
         <RefreshCw className="w-4 h-4" />
         Reintentar
@@ -94,10 +80,7 @@ const ErrorScreen = ({ error, onRetry }) => (
   </div>
 );
 
-// ============================================================
-// COMPONENTE PRINCIPAL
-// ============================================================
-
+// ─── COMPONENTE PRINCIPAL ───
 export default function App() {
   const { data, loading, error, refetch } = useAthleteState();
   const [activeTab, setActiveTab] = useState('dashboard');
@@ -110,24 +93,14 @@ export default function App() {
   if (!data) return <ErrorScreen error="No se recibieron datos" onRetry={refetch} />;
 
   return (
-    <div className="min-h-screen bg-[#0a0e17] text-[#e8edf5]">
-      <Header 
-        onRefresh={refetch} 
-        isMenuOpen={isMenuOpen} 
-        setIsMenuOpen={setIsMenuOpen} 
-      />
+    <div className="min-h-screen bg-[#0a0e17] text-[#e8edf5] font-['Inter'] antialiased">
+      <Header onRefresh={refetch} isMenuOpen={isMenuOpen} setIsMenuOpen={setIsMenuOpen} />
+      <Sidebar activeTab={activeTab} setActiveTab={setActiveTab} isOpen={isMenuOpen} setIsOpen={setIsMenuOpen} />
 
-      <Sidebar 
-        activeTab={activeTab} 
-        setActiveTab={setActiveTab} 
-        isOpen={isMenuOpen} 
-        setIsOpen={setIsMenuOpen} 
-      />
-
-      <main className={`transition-all duration-300 ${isMenuOpen ? 'ml-64' : 'ml-0'} p-4 md:p-6`}>
+      <main className={`transition-all duration-300 ease-in-out ${isMenuOpen ? 'lg:ml-64' : ''} p-4 md:p-6 lg:p-8`}>
         {activeTab === 'dashboard' && (
-          <DashboardView 
-            data={data} 
+          <DashboardView
+            data={data}
             onSelectActivity={(act) => {
               setSelectedActivity(act);
               setIsModalOpen(true);
@@ -135,58 +108,49 @@ export default function App() {
           />
         )}
         {activeTab === 'actividades' && (
-          <ActividadesView 
-            activities={data?.datos?.activities || []} 
+          <ActividadesView
+            activities={data?.datos?.activities || []}
             onSelectActivity={(act) => {
               setSelectedActivity(act);
               setIsModalOpen(true);
             }}
           />
         )}
-        {activeTab === 'progreso' && (
-          <ProgresoView data={data} />
-        )}
-        {activeTab === 'entrenos' && (
-          <EntrenosView data={data} />
-        )}
-        {activeTab === 'config' && (
-          <ConfigView data={data} />
-        )}
+        {activeTab === 'progreso' && <ProgresoView data={data} />}
+        {activeTab === 'entrenos' && <EntrenosView data={data} />}
+        {activeTab === 'config' && <ConfigView data={data} />}
       </main>
 
       {isModalOpen && selectedActivity && (
-        <ActivityModal 
-          activity={selectedActivity} 
+        <ActivityModal
+          activity={selectedActivity}
           onClose={() => {
             setIsModalOpen(false);
             setSelectedActivity(null);
-          }} 
+          }}
         />
       )}
     </div>
   );
 }
 
-// ============================================================
-// HEADER
-// ============================================================
-
+// ─── HEADER ───
 const Header = ({ onRefresh, isMenuOpen, setIsMenuOpen }) => (
   <header className="sticky top-0 z-50 bg-[#0f1624]/95 backdrop-blur-xl border-b border-[#1a2233]">
     <div className="max-w-7xl mx-auto px-4 py-3 flex justify-between items-center">
       <div className="flex items-center gap-3">
         <button
           onClick={() => setIsMenuOpen(!isMenuOpen)}
-          className="lg:hidden p-2 hover:bg-[#1a2233] rounded-xl transition"
+          className="lg:hidden p-2 hover:bg-[#1a2233] rounded-xl transition-colors"
         >
           {isMenuOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
         </button>
         <div className="flex items-center gap-3">
-          <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-[#1a2a4a] to-[#2a4a6a] flex items-center justify-center">
+          <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-[#1a2a4a] to-[#2a4a6a] flex items-center justify-center shadow-lg shadow-[#1a2a4a]/20">
             <Bike className="w-5 h-5 text-[#60a5fa]" />
           </div>
           <div className="hidden sm:block">
-            <h1 className="text-lg font-bold bg-gradient-to-r from-[#60a5fa] to-[#a78bfa] bg-clip-text text-transparent">
+            <h1 className="text-lg font-bold bg-gradient-to-r from-[#60a5fa] to-[#a78bfa] bg-clip-text text-transparent tracking-tight">
               WORLD TOUR COACH
             </h1>
             <p className="text-[10px] text-[#6b7a9f] tracking-wider">v10.1 · SINGLE SOURCE OF TRUTH</p>
@@ -196,9 +160,9 @@ const Header = ({ onRefresh, isMenuOpen, setIsMenuOpen }) => (
       <div className="flex items-center gap-2">
         <button
           onClick={onRefresh}
-          className="p-2 hover:bg-[#1a2233] rounded-xl transition group"
+          className="p-2 hover:bg-[#1a2233] rounded-xl transition-colors group"
         >
-          <RefreshCw className="w-4 h-4 text-[#6b7a9f] group-hover:text-[#60a5fa] transition group-hover:rotate-180" />
+          <RefreshCw className="w-4 h-4 text-[#6b7a9f] group-hover:text-[#60a5fa] transition-colors group-hover:rotate-180 duration-500" />
         </button>
         <div className="flex items-center gap-2 bg-[#1a2233] rounded-xl px-3 py-1.5">
           <span className="w-2 h-2 rounded-full bg-[#34d399] animate-pulse"></span>
@@ -211,10 +175,7 @@ const Header = ({ onRefresh, isMenuOpen, setIsMenuOpen }) => (
   </header>
 );
 
-// ============================================================
-// SIDEBAR
-// ============================================================
-
+// ─── SIDEBAR ───
 const Sidebar = ({ activeTab, setActiveTab, isOpen, setIsOpen }) => {
   const tabs = [
     { id: 'dashboard', icon: Home, label: 'Dashboard' },
@@ -227,32 +188,33 @@ const Sidebar = ({ activeTab, setActiveTab, isOpen, setIsOpen }) => {
   return (
     <>
       {isOpen && (
-        <div 
+        <div
           className="fixed inset-0 bg-black/60 z-40 lg:hidden"
           onClick={() => setIsOpen(false)}
         />
       )}
-      
+
       <aside className={`
         fixed top-0 left-0 h-full w-64 bg-[#0f1624] border-r border-[#1a2233] z-50
         transition-transform duration-300 ease-in-out
         ${isOpen ? 'translate-x-0' : '-translate-x-full'}
         lg:translate-x-0
+        shadow-2xl shadow-[#0a0e17]
       `}>
         <div className="flex flex-col h-full">
           <div className="p-4 border-b border-[#1a2233]">
             <div className="flex items-center gap-3">
-              <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-[#1a2a4a] to-[#2a4a6a] flex items-center justify-center">
+              <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-[#1a2a4a] to-[#2a4a6a] flex items-center justify-center shadow-lg shadow-[#1a2a4a]/20">
                 <Bike className="w-5 h-5 text-[#60a5fa]" />
               </div>
               <div>
-                <h2 className="text-sm font-bold text-white">WTC</h2>
+                <h2 className="text-sm font-bold text-white tracking-tight">WTC</h2>
                 <p className="text-[9px] text-[#6b7a9f]">v10.1</p>
               </div>
             </div>
           </div>
 
-          <nav className="flex-1 p-3 space-y-1 overflow-y-auto">
+          <nav className="flex-1 p-3 space-y-1 overflow-y-auto custom-scrollbar">
             {tabs.map((tab) => (
               <button
                 key={tab.id}
@@ -262,29 +224,25 @@ const Sidebar = ({ activeTab, setActiveTab, isOpen, setIsOpen }) => {
                 }}
                 className={`
                   w-full flex items-center gap-3 px-4 py-3 rounded-xl transition-all duration-200
-                  ${activeTab === tab.id 
-                    ? 'bg-[#1a2a4a] text-[#60a5fa] shadow-lg shadow-[#1a2a4a]/20' 
+                  ${activeTab === tab.id
+                    ? 'bg-[#1a2a4a] text-[#60a5fa] shadow-lg shadow-[#1a2a4a]/20'
                     : 'text-[#6b7a9f] hover:bg-[#1a2233] hover:text-white'
                   }
                 `}
               >
-                <tab.icon className="w-5 h-5" />
+                <tab.icon className={`w-5 h-5 ${activeTab === tab.id ? 'text-[#60a5fa]' : ''}`} />
                 <span className="text-sm font-medium">{tab.label}</span>
                 {activeTab === tab.id && (
-                  <div className="ml-auto w-1.5 h-8 rounded-full bg-[#60a5fa]"></div>
+                  <div className="ml-auto w-1.5 h-8 rounded-full bg-gradient-to-b from-[#60a5fa] to-[#a78bfa]"></div>
                 )}
               </button>
             ))}
           </nav>
 
           <div className="p-4 border-t border-[#1a2233]">
-            <div className="bg-[#0a0e17] rounded-xl p-3">
-              <p className="text-[10px] text-[#4b5563] text-center">
-                🧠 Single Source of Truth
-              </p>
-              <p className="text-[9px] text-[#4b5563] text-center mt-0.5">
-                generateWorkout()
-              </p>
+            <div className="bg-[#0a0e17] rounded-xl p-3 text-center border border-[#1a2233]">
+              <p className="text-[10px] text-[#4b5563]">🧠 Single Source of Truth</p>
+              <p className="text-[9px] text-[#4b5563] mt-0.5 font-mono">generateWorkout()</p>
             </div>
           </div>
         </div>
@@ -293,10 +251,7 @@ const Sidebar = ({ activeTab, setActiveTab, isOpen, setIsOpen }) => {
   );
 };
 
-// ============================================================
-// DASHBOARD VIEW
-// ============================================================
-
+// ─── DASHBOARD ───
 const DashboardView = ({ data, onSelectActivity }) => {
   const tsb = data?.tsb || 0;
   const readiness = data?.readiness || 50;
@@ -321,7 +276,7 @@ const DashboardView = ({ data, onSelectActivity }) => {
   }, [ctl, atl, tsb]);
 
   return (
-    <div className="max-w-7xl mx-auto space-y-6">
+    <div className="max-w-7xl mx-auto space-y-6 animate-fade-in-up">
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
         <WidgetCard
           label="TSB"
@@ -360,7 +315,40 @@ const DashboardView = ({ data, onSelectActivity }) => {
       <PlanCard decision={decision} entreno={entreno} />
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        <ChartCard data={chartData} className="lg:col-span-2" />
+        <div className="lg:col-span-2 card hover:border-[#2a3a5a] transition-all">
+          <div className="flex justify-between items-center mb-4">
+            <div>
+              <h3 className="text-sm font-semibold text-[#9ca3af] flex items-center gap-2">
+                <LineChartIcon className="w-4 h-4" />
+                EVOLUCIÓN DE CARGA
+              </h3>
+              <p className="text-[10px] text-[#4b5563]">Últimos 14 días</p>
+            </div>
+            <div className="flex gap-3 text-xs">
+              <span className="flex items-center gap-1"><span className="w-3 h-0.5 bg-[#34d399]"></span> CTL</span>
+              <span className="flex items-center gap-1"><span className="w-3 h-0.5 bg-[#ef4444]"></span> ATL</span>
+              <span className="flex items-center gap-1"><span className="w-3 h-0.5 bg-[#fbbf24]"></span> TSB</span>
+            </div>
+          </div>
+          <div className="h-[200px]">
+            <ResponsiveContainer width="100%" height="100%">
+              <ComposedChart data={chartData}>
+                <CartesianGrid strokeDasharray="3 3" stroke="#1a2233" />
+                <XAxis dataKey="dia" stroke="#4b5563" fontSize={10} tickLine={false} />
+                <YAxis stroke="#4b5563" fontSize={10} tickLine={false} />
+                <Tooltip
+                  contentStyle={{ background: '#111827', border: '1px solid #1f2937', borderRadius: '8px' }}
+                  labelStyle={{ color: '#9ca3af' }}
+                />
+                <Legend iconType="circle" />
+                <Area type="monotone" dataKey="ctl" stroke="#34d399" fill="#34d399" fillOpacity={0.1} />
+                <Area type="monotone" dataKey="atl" stroke="#ef4444" fill="#ef4444" fillOpacity={0.1} />
+                <Line type="monotone" dataKey="tsb" stroke="#fbbf24" strokeWidth={2} dot={false} />
+              </ComposedChart>
+            </ResponsiveContainer>
+          </div>
+        </div>
+
         <WeatherCard weather={weather} />
       </div>
 
@@ -372,15 +360,12 @@ const DashboardView = ({ data, onSelectActivity }) => {
   );
 };
 
-// ============================================================
-// COMPONENTES DE UI
-// ============================================================
-
+// ─── WIDGET CARD ───
 const WidgetCard = ({ label, value, color, icon: Icon, subtitle, detail }) => (
-  <div className="bg-[#111827] border border-[#1f2937] rounded-2xl p-4 hover:border-[#2a3a5a] transition-all duration-300 hover:shadow-xl hover:shadow-[#0a0e17]/50 group">
+  <div className="bg-[#111827] border border-[#1a2233] rounded-2xl p-5 hover:border-[#2a3a5a] transition-all duration-300 hover:shadow-2xl hover:shadow-[#0a0e17] group">
     <div className="flex justify-between items-start">
-      <p className="text-xs text-[#6b7a9f] uppercase tracking-wider">{label}</p>
-      <Icon className="w-4 h-4" style={{ color }} />
+      <p className="text-xs text-[#6b7a9f] uppercase tracking-wider font-semibold">{label}</p>
+      <Icon className="w-4 h-4 transition-transform group-hover:scale-110" style={{ color }} />
     </div>
     <p className="text-2xl font-bold mt-1" style={{ color }}>{value}</p>
     <p className="text-xs text-[#6b7a9f] mt-1 flex items-center gap-1">
@@ -391,12 +376,13 @@ const WidgetCard = ({ label, value, color, icon: Icon, subtitle, detail }) => (
   </div>
 );
 
+// ─── PLAN CARD ───
 const PlanCard = ({ decision, entreno }) => {
   const isDescanso = decision.tipo === 'descanso';
   const intensidad = Math.round((decision.intensidad || 0) * 100);
 
   return (
-    <div className="bg-gradient-to-br from-[#111827] to-[#0f1624] border border-[#1f2937] rounded-2xl p-6 hover:border-[#2a3a5a] transition-all duration-300">
+    <div className="bg-gradient-to-br from-[#111827] to-[#0f1624] border border-[#1a2233] rounded-2xl p-6 hover:border-[#2a3a5a] transition-all duration-300 shadow-xl shadow-[#0a0e17]">
       <div className="flex flex-wrap justify-between items-start gap-4">
         <div>
           <h2 className="text-sm font-semibold text-[#9ca3af] flex items-center gap-2">
@@ -405,7 +391,7 @@ const PlanCard = ({ decision, entreno }) => {
           </h2>
           <p className="text-[10px] text-[#4b5563] mt-1">Generado por IA · Single Source of Truth</p>
         </div>
-        <span className="text-[10px] bg-[#1a2a4a] text-[#60a5fa] px-3 py-1 rounded-full">
+        <span className={`text-[10px] px-3 py-1 rounded-full ${isDescanso ? 'bg-[#1a2a1a] text-[#34d399]' : 'bg-[#1a2a4a] text-[#60a5fa]'}`}>
           {isDescanso ? '🧘 RECUPERACIÓN' : `🎯 ${decision.prioridad?.toUpperCase() || 'BASE'}`}
         </span>
       </div>
@@ -426,7 +412,7 @@ const PlanCard = ({ decision, entreno }) => {
             <MetricItem label="Vatios" value={`${entreno.wLow || 0}-${entreno.wHigh || 0}W`} sub="Rango objetivo" color="#34d399" />
           </div>
           {decision.notaHidratacion && (
-            <div className="mt-4 flex items-center gap-2 bg-[#0a0e17] rounded-xl px-4 py-2.5 text-sm text-[#60a5fa]">
+            <div className="mt-4 flex items-center gap-2 bg-[#0a0e17] rounded-xl px-4 py-2.5 text-sm text-[#60a5fa] border border-[#1a2233]">
               <Droplet className="w-4 h-4" />
               <span>{decision.notaHidratacion}</span>
             </div>
@@ -440,53 +426,19 @@ const PlanCard = ({ decision, entreno }) => {
   );
 };
 
+// ─── METRIC ITEM ───
 const MetricItem = ({ label, value, sub, color }) => (
-  <div className="bg-[#0a0e17] rounded-xl p-3 text-center">
+  <div className="bg-[#0a0e17] rounded-xl p-3 text-center transition-all hover:bg-[#1a2233] border border-[#1a2233] hover:border-[#2a3a5a]">
     <p className="text-lg font-bold" style={{ color }}>{value}</p>
     <p className="text-xs text-[#6b7a9f]">{label}</p>
     {sub && <p className="text-[10px] text-[#4b5563]">{sub}</p>}
   </div>
 );
 
-const ChartCard = ({ data }) => (
-  <div className="bg-[#111827] border border-[#1f2937] rounded-2xl p-5">
-    <div className="flex justify-between items-center mb-4">
-      <div>
-        <h3 className="text-sm font-semibold text-[#9ca3af] flex items-center gap-2">
-          <LineChartIcon className="w-4 h-4" />
-          EVOLUCIÓN DE CARGA
-        </h3>
-        <p className="text-[10px] text-[#4b5563]">Últimos 14 días</p>
-      </div>
-      <div className="flex gap-3 text-xs">
-        <span className="flex items-center gap-1"><span className="w-3 h-0.5 bg-[#34d399]"></span> CTL</span>
-        <span className="flex items-center gap-1"><span className="w-3 h-0.5 bg-[#ef4444]"></span> ATL</span>
-        <span className="flex items-center gap-1"><span className="w-3 h-0.5 bg-[#fbbf24]"></span> TSB</span>
-      </div>
-    </div>
-    <div className="h-[200px]">
-      <ResponsiveContainer width="100%" height="100%">
-        <ComposedChart data={data}>
-          <CartesianGrid strokeDasharray="3 3" stroke="#1a2233" />
-          <XAxis dataKey="dia" stroke="#4b5563" fontSize={10} tickLine={false} />
-          <YAxis stroke="#4b5563" fontSize={10} tickLine={false} />
-          <Tooltip
-            contentStyle={{ background: '#111827', border: '1px solid #1f2937', borderRadius: '8px' }}
-            labelStyle={{ color: '#9ca3af' }}
-          />
-          <Legend iconType="circle" />
-          <Area type="monotone" dataKey="ctl" stroke="#34d399" fill="#34d399" fillOpacity={0.1} />
-          <Area type="monotone" dataKey="atl" stroke="#ef4444" fill="#ef4444" fillOpacity={0.1} />
-          <Line type="monotone" dataKey="tsb" stroke="#fbbf24" strokeWidth={2} dot={false} />
-        </ComposedChart>
-      </ResponsiveContainer>
-    </div>
-  </div>
-);
-
+// ─── WEATHER CARD ───
 const WeatherCard = ({ weather }) => {
   if (!weather) return (
-    <div className="bg-[#111827] border border-[#1f2937] rounded-2xl p-5 flex items-center justify-center text-[#4b5563]">
+    <div className="card flex items-center justify-center text-[#4b5563]">
       <Cloud className="w-8 h-8 mr-2 opacity-50" />
       <span className="text-sm">Sin datos climáticos</span>
     </div>
@@ -494,13 +446,12 @@ const WeatherCard = ({ weather }) => {
 
   const temp = weather.temp;
   const isHot = typeof temp === 'number' && temp > 30;
-  const isCold = typeof temp === 'number' && temp < 5;
-  const emoji = typeof temp === 'number' 
+  const emoji = typeof temp === 'number'
     ? temp > 35 ? '🔥' : temp > 30 ? '🌡️' : temp > 25 ? '☀️' : temp > 15 ? '🌤️' : temp > 5 ? '🌥️' : '❄️'
     : '🌤️';
 
   return (
-    <div className="bg-[#111827] border border-[#1f2937] rounded-2xl p-5">
+    <div className="card hover:border-[#2a3a5a] transition-all">
       <h3 className="text-sm font-semibold text-[#9ca3af] flex items-center gap-2 mb-4">
         <Cloud className="w-4 h-4" />
         CLIMA
@@ -516,11 +467,11 @@ const WeatherCard = ({ weather }) => {
           </div>
         </div>
         <div className="grid grid-cols-2 gap-2 text-sm">
-          <div className="bg-[#0a0e17] rounded-xl px-3 py-2 flex items-center gap-2">
+          <div className="bg-[#0a0e17] rounded-xl px-3 py-2 flex items-center gap-2 border border-[#1a2233]">
             <Wind className="w-4 h-4 text-[#6b7a9f]" />
             <span>{weather.wind || 0} km/h</span>
           </div>
-          <div className="bg-[#0a0e17] rounded-xl px-3 py-2 flex items-center gap-2">
+          <div className="bg-[#0a0e17] rounded-xl px-3 py-2 flex items-center gap-2 border border-[#1a2233]">
             <Droplet className="w-4 h-4 text-[#6b7a9f]" />
             <span>{weather.rain || 0} mm</span>
           </div>
@@ -531,21 +482,16 @@ const WeatherCard = ({ weather }) => {
             Calor alto · Hidratación extra
           </div>
         )}
-        {isCold && (
-          <div className="bg-[#1a1a2a] border border-[#2a2a4a] rounded-xl px-3 py-2 text-xs text-[#60a5fa] flex items-center gap-2">
-            <AlertTriangle className="w-4 h-4" />
-            Frío · Protégete bien
-          </div>
-        )}
       </div>
     </div>
   );
 };
 
+// ─── ACTIVIDADES RECIENTES ───
 const RecentActivities = ({ activities, onSelect }) => {
   if (activities.length === 0) {
     return (
-      <div className="bg-[#111827] border border-[#1f2937] rounded-2xl p-5 flex flex-col items-center justify-center text-[#4b5563] py-12">
+      <div className="card flex flex-col items-center justify-center text-[#4b5563] py-12">
         <Activity className="w-12 h-12 mb-3 opacity-30" />
         <p className="text-sm">No hay actividades recientes</p>
         <p className="text-xs mt-1">Los entrenos aparecerán aquí</p>
@@ -554,7 +500,7 @@ const RecentActivities = ({ activities, onSelect }) => {
   }
 
   return (
-    <div className="bg-[#111827] border border-[#1f2937] rounded-2xl p-5">
+    <div className="card hover:border-[#2a3a5a] transition-all">
       <div className="flex justify-between items-center mb-4">
         <h3 className="text-sm font-semibold text-[#9ca3af] flex items-center gap-2">
           <Activity className="w-4 h-4" />
@@ -571,14 +517,14 @@ const RecentActivities = ({ activities, onSelect }) => {
               onClick={() => onSelect(act)}
               className="w-full bg-[#0a0e17] rounded-xl p-3 flex items-center gap-3 hover:bg-[#1a2233] transition-all duration-200 border border-transparent hover:border-[#1f2937] group"
             >
-              <div className="w-10 h-10 rounded-lg bg-[#1a2a4a] flex items-center justify-center group-hover:scale-105 transition">
+              <div className="w-10 h-10 rounded-lg bg-[#1a2a4a] flex items-center justify-center group-hover:scale-105 transition-transform">
                 <Bike className="w-5 h-5 text-[#60a5fa]" />
               </div>
               <div className="flex-1 min-w-0 text-left">
                 <p className="text-sm font-medium truncate">{act.name || 'Ciclismo'}</p>
                 <p className="text-xs text-[#6b7a9f]">
-                  {date.toLocaleDateString('es-ES', { day: '2-digit', month: 'short' })} · 
-                  {act.distance ? ` ${(act.distance / 1000).toFixed(1)} km` : ' 0 km'} · 
+                  {date.toLocaleDateString('es-ES', { day: '2-digit', month: 'short' })} ·
+                  {act.distance ? ` ${(act.distance / 1000).toFixed(1)} km` : ' 0 km'} ·
                   {act.moving_time ? ` ${Math.round(act.moving_time / 60)} min` : ' 0 min'}
                 </p>
               </div>
@@ -586,7 +532,7 @@ const RecentActivities = ({ activities, onSelect }) => {
                 <p className="text-sm font-semibold text-[#fbbf24]">{Math.round(act.icu_training_load || 0)} TSS</p>
                 <p className="text-xs text-[#6b7a9f]">{Math.round(act.icu_weighted_avg_watts || 0)}W</p>
               </div>
-              <ChevronRight className="w-4 h-4 text-[#4b5563] group-hover:text-[#60a5fa] transition" />
+              <ChevronRight className="w-4 h-4 text-[#4b5563] group-hover:text-[#60a5fa] transition-colors" />
             </button>
           );
         })}
@@ -595,13 +541,14 @@ const RecentActivities = ({ activities, onSelect }) => {
   );
 };
 
+// ─── INSIGHTS CARD ───
 const InsightsCard = ({ consejo, data }) => {
   const sleepQuality = data?.estado?.sleepQuality || 2;
   const weeklyTss = data?.estado?.weeklyTss || 0;
   const weeklySessions = data?.estado?.weeklySessions || 0;
 
   return (
-    <div className="bg-[#111827] border border-[#1f2937] rounded-2xl p-5">
+    <div className="card hover:border-[#2a3a5a] transition-all">
       <h3 className="text-sm font-semibold text-[#9ca3af] flex items-center gap-2 mb-4">
         <Heart className="w-4 h-4" />
         INSIGHTS & CONSEJOS
@@ -613,7 +560,7 @@ const InsightsCard = ({ consejo, data }) => {
             <span>{c}</span>
           </div>
         ))}
-        <div className="bg-[#0a0e17] rounded-xl p-3 space-y-2">
+        <div className="bg-[#0a0e17] rounded-xl p-3 space-y-2 border border-[#1a2233]">
           <div className="flex justify-between items-center text-sm">
             <span className="text-[#6b7a9f]">😴 Sueño</span>
             <span className="font-medium">
@@ -638,17 +585,14 @@ const InsightsCard = ({ consejo, data }) => {
   );
 };
 
-// ============================================================
-// OTRAS VISTAS
-// ============================================================
-
+// ─── ACTIVIDADES VIEW ───
 const ActividadesView = ({ activities, onSelectActivity }) => (
-  <div className="max-w-7xl mx-auto">
+  <div className="max-w-7xl mx-auto animate-fade-in-up">
     <h2 className="text-xl font-bold mb-6 flex items-center gap-2">
       <List className="w-6 h-6 text-[#60a5fa]" />
       Actividades
     </h2>
-    <div className="bg-[#111827] border border-[#1f2937] rounded-2xl p-4">
+    <div className="card">
       {activities.length === 0 ? (
         <div className="text-center py-12 text-[#4b5563]">
           <Activity className="w-12 h-12 mx-auto mb-3 opacity-30" />
@@ -697,22 +641,23 @@ const ActividadesView = ({ activities, onSelectActivity }) => (
   </div>
 );
 
+// ─── PROGRESO VIEW ───
 const ProgresoView = ({ data }) => {
   const ftp = data?.config?.ftp || 240;
   const objetivo = data?.config?.objetivo || 296;
   const progreso = Math.min(100, Math.round(((ftp - 200) / (objetivo - 200)) * 100));
 
   return (
-    <div className="max-w-7xl mx-auto">
+    <div className="max-w-7xl mx-auto animate-fade-in-up">
       <h2 className="text-xl font-bold mb-6 flex items-center gap-2">
         <LineChartIcon className="w-6 h-6 text-[#60a5fa]" />
         Progreso
       </h2>
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        <div className="lg:col-span-2 bg-[#111827] border border-[#1f2937] rounded-2xl p-6">
+        <div className="lg:col-span-2 card">
           <h3 className="text-sm font-semibold text-[#9ca3af] mb-4">Evolución FTP</h3>
           <div className="relative h-4 bg-[#1a2233] rounded-full overflow-hidden">
-            <div 
+            <div
               className="absolute inset-y-0 left-0 bg-gradient-to-r from-[#60a5fa] to-[#a78bfa] rounded-full transition-all duration-1000"
               style={{ width: `${Math.min(100, progreso)}%` }}
             />
@@ -723,36 +668,36 @@ const ProgresoView = ({ data }) => {
             <span className="text-[#6b7a9f]">{objetivo}W</span>
           </div>
           <div className="mt-6 grid grid-cols-3 gap-4 text-center">
-            <div className="bg-[#0a0e17] rounded-xl p-3">
+            <div className="bg-[#0a0e17] rounded-xl p-3 border border-[#1a2233]">
               <p className="text-2xl font-bold text-[#34d399]">{ftp}W</p>
               <p className="text-xs text-[#6b7a9f]">FTP Actual</p>
             </div>
-            <div className="bg-[#0a0e17] rounded-xl p-3">
+            <div className="bg-[#0a0e17] rounded-xl p-3 border border-[#1a2233]">
               <p className="text-2xl font-bold text-[#fbbf24]">{objetivo}W</p>
               <p className="text-xs text-[#6b7a9f]">Objetivo</p>
             </div>
-            <div className="bg-[#0a0e17] rounded-xl p-3">
+            <div className="bg-[#0a0e17] rounded-xl p-3 border border-[#1a2233]">
               <p className="text-2xl font-bold text-[#60a5fa]">{progreso}%</p>
               <p className="text-xs text-[#6b7a9f]">Progreso</p>
             </div>
           </div>
         </div>
-        <div className="bg-[#111827] border border-[#1f2937] rounded-2xl p-6">
+        <div className="card">
           <h3 className="text-sm font-semibold text-[#9ca3af] mb-4">Estadísticas</h3>
           <div className="space-y-3">
-            <div className="flex justify-between text-sm">
+            <div className="flex justify-between text-sm py-2 border-b border-[#1a2233]">
               <span className="text-[#6b7a9f]">CTL</span>
               <span className="font-medium">{data?.estado?.ctl?.toFixed(1) || 0}</span>
             </div>
-            <div className="flex justify-between text-sm">
+            <div className="flex justify-between text-sm py-2 border-b border-[#1a2233]">
               <span className="text-[#6b7a9f]">ATL</span>
               <span className="font-medium">{data?.estado?.atl?.toFixed(1) || 0}</span>
             </div>
-            <div className="flex justify-between text-sm">
+            <div className="flex justify-between text-sm py-2 border-b border-[#1a2233]">
               <span className="text-[#6b7a9f]">TSB</span>
               <span className="font-medium">{data?.tsb?.toFixed(1) || 0}</span>
             </div>
-            <div className="flex justify-between text-sm">
+            <div className="flex justify-between text-sm py-2">
               <span className="text-[#6b7a9f]">Readiness</span>
               <span className="font-medium">{data?.readiness || 0}%</span>
             </div>
@@ -763,18 +708,19 @@ const ProgresoView = ({ data }) => {
   );
 };
 
+// ─── ENTRENOS VIEW ───
 const EntrenosView = ({ data }) => {
   const decision = data?.decision || { tipo: 'descanso' };
   const entreno = data?.entreno || {};
   const isDescanso = decision.tipo === 'descanso';
 
   return (
-    <div className="max-w-7xl mx-auto">
+    <div className="max-w-7xl mx-auto animate-fade-in-up">
       <h2 className="text-xl font-bold mb-6 flex items-center gap-2">
         <Target className="w-6 h-6 text-[#60a5fa]" />
         Entrenos
       </h2>
-      <div className="bg-[#111827] border border-[#1f2937] rounded-2xl p-6">
+      <div className="card">
         {isDescanso ? (
           <div className="text-center py-12">
             <div className="text-5xl mb-4">🧘</div>
@@ -784,30 +730,30 @@ const EntrenosView = ({ data }) => {
         ) : (
           <div className="space-y-6">
             <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-              <div className="bg-[#0a0e17] rounded-xl p-4 text-center">
+              <div className="bg-[#0a0e17] rounded-xl p-4 text-center border border-[#1a2233]">
                 <p className="text-xs text-[#6b7a9f]">Tipo</p>
                 <p className="text-lg font-bold text-[#fbbf24]">{decision.tipo?.toUpperCase() || 'Z2'}</p>
               </div>
-              <div className="bg-[#0a0e17] rounded-xl p-4 text-center">
+              <div className="bg-[#0a0e17] rounded-xl p-4 text-center border border-[#1a2233]">
                 <p className="text-xs text-[#6b7a9f]">Estructura</p>
                 <p className="text-lg font-bold text-[#60a5fa]">{decision.reps || 1}x{decision.durMin || 0}min</p>
               </div>
-              <div className="bg-[#0a0e17] rounded-xl p-4 text-center">
+              <div className="bg-[#0a0e17] rounded-xl p-4 text-center border border-[#1a2233]">
                 <p className="text-xs text-[#6b7a9f]">Intensidad</p>
                 <p className="text-lg font-bold text-[#34d399]">{Math.round((decision.intensidad || 0) * 100)}%</p>
               </div>
-              <div className="bg-[#0a0e17] rounded-xl p-4 text-center">
+              <div className="bg-[#0a0e17] rounded-xl p-4 text-center border border-[#1a2233]">
                 <p className="text-xs text-[#6b7a9f]">TSS</p>
                 <p className="text-lg font-bold text-[#fbbf24]">{entreno.tssEsperado || 0}</p>
               </div>
             </div>
             {decision.notaHidratacion && (
-              <div className="flex items-center gap-2 bg-[#0a0e17] rounded-xl px-4 py-3 text-sm text-[#60a5fa]">
+              <div className="flex items-center gap-2 bg-[#0a0e17] rounded-xl px-4 py-3 text-sm text-[#60a5fa] border border-[#1a2233]">
                 <Droplet className="w-4 h-4" />
                 <span>{decision.notaHidratacion}</span>
               </div>
             )}
-            <div className="bg-[#0a0e17] rounded-xl p-4">
+            <div className="bg-[#0a0e17] rounded-xl p-4 border border-[#1a2233]">
               <p className="text-xs text-[#6b7a9f] mb-2">Motivo</p>
               <p className="text-sm text-[#e8edf5]">{decision.motivo || 'Plan base'}</p>
             </div>
@@ -818,13 +764,14 @@ const EntrenosView = ({ data }) => {
   );
 };
 
+// ─── CONFIG VIEW ───
 const ConfigView = ({ data }) => (
-  <div className="max-w-7xl mx-auto">
+  <div className="max-w-7xl mx-auto animate-fade-in-up">
     <h2 className="text-xl font-bold mb-6 flex items-center gap-2">
       <Settings className="w-6 h-6 text-[#60a5fa]" />
       Configuración
     </h2>
-    <div className="bg-[#111827] border border-[#1f2937] rounded-2xl p-6">
+    <div className="card">
       <div className="space-y-4">
         <div className="flex justify-between py-2 border-b border-[#1a2233]">
           <span className="text-[#6b7a9f]">FTP</span>
@@ -851,10 +798,7 @@ const ConfigView = ({ data }) => (
   </div>
 );
 
-// ============================================================
-// MODAL DE ACTIVIDAD
-// ============================================================
-
+// ─── ACTIVITY MODAL ───
 const ActivityModal = ({ activity, onClose }) => {
   const date = new Date(activity.start_date_local || Date.now());
   const distance = activity.distance ? (activity.distance / 1000).toFixed(1) : '0';
@@ -868,7 +812,7 @@ const ActivityModal = ({ activity, onClose }) => {
 
   return (
     <div className="fixed inset-0 z-[100] bg-black/80 backdrop-blur-sm flex items-center justify-center p-4 animate-in fade-in duration-300">
-      <div className="bg-[#111827] border border-[#1f2937] rounded-2xl max-w-2xl w-full max-h-[90vh] overflow-y-auto p-6 animate-in slide-in-from-bottom-4 duration-300">
+      <div className="bg-[#111827] border border-[#1f2937] rounded-2xl max-w-2xl w-full max-h-[90vh] overflow-y-auto p-6 shadow-2xl shadow-[#0a0e17] animate-in slide-in-from-bottom-4 duration-300">
         <div className="flex justify-between items-start mb-6">
           <div>
             <h2 className="text-xl font-bold flex items-center gap-2">
@@ -876,39 +820,39 @@ const ActivityModal = ({ activity, onClose }) => {
               {activity.name || 'Ciclismo'}
             </h2>
             <p className="text-sm text-[#6b7a9f] mt-1">
-              {date.toLocaleDateString('es-ES', { 
-                weekday: 'long', day: '2-digit', month: 'long', year: 'numeric' 
+              {date.toLocaleDateString('es-ES', {
+                weekday: 'long', day: '2-digit', month: 'long', year: 'numeric'
               })} · {date.toLocaleTimeString('es-ES', { hour: '2-digit', minute: '2-digit' })}
             </p>
           </div>
           <button
             onClick={onClose}
-            className="p-2 hover:bg-[#1a2233] rounded-xl transition"
+            className="p-2 hover:bg-[#1a2233] rounded-xl transition-colors"
           >
             <X className="w-5 h-5 text-[#6b7a9f]" />
           </button>
         </div>
 
         <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 mb-6">
-          <div className="bg-[#0a0e17] rounded-xl p-3 text-center">
+          <div className="bg-[#0a0e17] rounded-xl p-3 text-center border border-[#1a2233]">
             <p className="text-xs text-[#6b7a9f]">Distancia</p>
             <p className="text-lg font-bold text-[#60a5fa]">{distance} km</p>
           </div>
-          <div className="bg-[#0a0e17] rounded-xl p-3 text-center">
+          <div className="bg-[#0a0e17] rounded-xl p-3 text-center border border-[#1a2233]">
             <p className="text-xs text-[#6b7a9f]">Duración</p>
             <p className="text-lg font-bold text-[#60a5fa]">{duration} min</p>
           </div>
-          <div className="bg-[#0a0e17] rounded-xl p-3 text-center">
+          <div className="bg-[#0a0e17] rounded-xl p-3 text-center border border-[#1a2233]">
             <p className="text-xs text-[#6b7a9f]">TSS</p>
             <p className="text-lg font-bold text-[#fbbf24]">{tss}</p>
           </div>
-          <div className="bg-[#0a0e17] rounded-xl p-3 text-center">
+          <div className="bg-[#0a0e17] rounded-xl p-3 text-center border border-[#1a2233]">
             <p className="text-xs text-[#6b7a9f]">IF</p>
             <p className="text-lg font-bold text-[#34d399]">{ifFactor.toFixed(2)}</p>
           </div>
         </div>
 
-        <div className="bg-[#0a0e17] rounded-xl p-4 mb-6">
+        <div className="bg-[#0a0e17] rounded-xl p-4 mb-6 border border-[#1a2233]">
           <h4 className="text-sm font-semibold text-[#9ca3af] mb-3">Métricas de potencia</h4>
           <div className="grid grid-cols-3 gap-4 text-center">
             <div>

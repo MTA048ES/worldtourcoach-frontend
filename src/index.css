@@ -1,25 +1,28 @@
 @import "tailwindcss";
 
 body {
-  font-family: 'Inter', sans-serif;
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
   background: #0a0e17;
   color: #e8edf5;
+  -webkit-font-smoothing: antialiased;
 }
 
+/* ─── TARJETAS ─── */
 .card {
   background: #111827;
   border: 1px solid #1a2233;
   border-radius: 16px;
   padding: 20px;
-  transition: all 0.3s ease;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 .card:hover {
   border-color: #2a3a5a;
-  box-shadow: 0 8px 30px rgba(0,0,0,0.4);
+  box-shadow: 0 8px 30px rgba(0, 0, 0, 0.4);
   transform: translateY(-2px);
 }
 
+/* ─── BOTONES ─── */
 .btn-primary {
   background: linear-gradient(135deg, #3b82f6, #2563eb);
   color: white;
@@ -36,11 +39,41 @@ body {
   box-shadow: 0 4px 20px rgba(59, 130, 246, 0.3);
 }
 
+/* ─── ANIMACIONES ─── */
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
 .animate-fade-in-up {
   animation: fadeInUp 0.5s ease-out forwards;
 }
 
-@keyframes fadeInUp {
-  from { opacity: 0; transform: translateY(20px); }
-  to { opacity: 1; transform: translateY(0); }
+/* ─── SCROLLBAR ─── */
+.custom-scrollbar::-webkit-scrollbar {
+  width: 4px;
+}
+
+.custom-scrollbar::-webkit-scrollbar-track {
+  background: #0a0e17;
+}
+
+.custom-scrollbar::-webkit-scrollbar-thumb {
+  background: #1f2937;
+  border-radius: 4px;
+}
+
+.custom-scrollbar::-webkit-scrollbar-thumb:hover {
+  background: #2a3a5a;
+}
+
+.custom-scrollbar {
+  scrollbar-width: thin;
+  scrollbar-color: #1f2937 #0a0e17;
 }
