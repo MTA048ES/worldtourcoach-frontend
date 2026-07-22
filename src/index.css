@@ -1,6 +1,4 @@
-@tailwind base;
-@tailwind components;
-@tailwind utilities;
+@import "tailwindcss";
 
 body {
   background: #0a0e17;
@@ -8,11 +6,6 @@ body {
   font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
 }
 
-/* ============================================================
-   SCROLLBAR PERSONALIZADO (ESTILO STRAVA)
-   ============================================================ */
-
-/* Para navegadores WebKit (Chrome, Edge, Safari, Opera) */
 .custom-scrollbar::-webkit-scrollbar {
   width: 4px;
 }
@@ -30,7 +23,6 @@ body {
   background: #2a3a5a;
 }
 
-/* Para Firefox */
 .custom-scrollbar {
   scrollbar-width: thin;
   scrollbar-color: #1f2937 #0a0e17;
